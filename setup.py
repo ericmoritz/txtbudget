@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
 from setuptools import setup
+import txtbudget
 
 setup(name='txtbudget',
-      version='1.0.2',
+      version=txtbudget.__version__,
       description='Text based budget scheduler',
       author='Eric Moritz',
       author_email='eric@themoritzfamily.com',
