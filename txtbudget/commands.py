@@ -23,6 +23,7 @@ list [month number] - list out the transactions for a month
 
     schedule_filename = config['filename']
     dates = args
+    month_start = int(config.get("month_start", 1))
 
     if len(dates) == 2:
         dtstart = parser.parse(dates[0])
@@ -35,7 +36,7 @@ list [month number] - list out the transactions for a month
             except IndexError:
                 month = date.today().month
 
-            dtstart = parser.parse("%s/1" % (month, ))
+            dtstart = parser.parse("%s/%s" % (month, month_start))
             dtend = dtstart + relativedelta(months=1) - relativedelta(days=1)
         except ValueError:
             dtstart = None
