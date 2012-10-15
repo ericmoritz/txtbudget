@@ -9,5 +9,8 @@ setup(name='txtbudget',
       author_email='eric@themoritzfamily.com',
       scripts=['bin/txtbudget',],
       packages=['txtbudget',],
+      install_requires=[
+          "dateutils"
+      ],
       test_suite="txtbudget.tests",
      )
