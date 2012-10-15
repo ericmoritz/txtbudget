@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from distutils.core import setup
+from setuptools import setup
 
 setup(name='txtbudget',
       version='1.0.2',
@@ -9,4 +9,8 @@ setup(name='txtbudget',
       author_email='eric@themoritzfamily.com',
       scripts=['bin/txtbudget',],
       packages=['txtbudget',],
+      install_requires=[
+          "dateutils"
+      ],
+      test_suite="txtbudget.tests",
      )

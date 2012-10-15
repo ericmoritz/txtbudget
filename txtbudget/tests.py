@@ -1,6 +1,11 @@
 import unittest
 import utils as budget
 from datetime import datetime
+from txtbudget import config
+import os.path
+
+HERE = os.path.dirname(__file__)
+
 
 class CreateRRule(unittest.TestCase):
 
@@ -22,7 +27,7 @@ class CreateRRule(unittest.TestCase):
         expect = [datetime(2010, 3, 5),
                   datetime(2010, 3, 19),
                   datetime(2010, 4, 2), ]
-        
+
         self.assertEqual(expect, result)
 
     def test_count(self):
@@ -32,7 +37,7 @@ class CreateRRule(unittest.TestCase):
         result = list(rrule)
         expect = [datetime(2010, 3, 5),
                   datetime(2010, 3, 12),]
-        
+
         self.assertEqual(expect, result)
 
 
@@ -44,14 +49,14 @@ class CreateRRule(unittest.TestCase):
         expect = [datetime(2010, 3, 5),
                   datetime(2010, 3, 12),
                   datetime(2010, 3, 19), ]
-        
+
         self.assertEqual(expect, result)
 
 
 class TestScheduleParserGen(unittest.TestCase):
     def test_comment(self):
         fixture = [u"# This is a comment",
-                   u" # This is one as well", 
+                   u" # This is one as well",
                    u"",
                    u"   ",
                    u"Name1, 20.10, 04/13/2010, # Comment"]
@@ -130,7 +135,7 @@ class TestScheduleItem(unittest.TestCase):
                                       u"2w")
         expect = [(u'Name', 20.10, datetime(2010, 3, 5)),
                   (u'Name', 20.10, datetime(2010, 3, 19)), ]
-        
+
         result = list(fixture.until(datetime(2010, 3, 19)))
 
         self.assertEqual(expect, result)
@@ -142,7 +147,7 @@ class TestScheduleItem(unittest.TestCase):
                                       datetime(2010, 3, 5),
                                       u"")
         expect = [(u'Name', 20.10, datetime(2010, 3, 5)),]
-        
+
         result = list(fixture.until(datetime(2010, 3, 19)))
 
         self.assertEqual(expect, result)
@@ -156,7 +161,7 @@ class TestTransactionItem(unittest.TestCase):
                                          datetime(2010, 3, 15))
         expect = [u"Name", 20.10, datetime(2010, 3, 15)]
         result = list(fixture)
-        
+
         self.assertEqual(expect, result)
 
 
@@ -166,9 +171,44 @@ class TestTransactionItem(unittest.TestCase):
                                          datetime(2010, 3, 15))
         expect = u"Name, 20.1, 03/15/2010"
         result = unicode(fixture)
-        
+
         self.assertEqual(expect, result)
-        
+
+
+class TestLoadConfig(unittest.TestCase):
+    def test(self):
+        def configer1():
+            return {"key1": "val1", "key2": "val2"}
+
+        def configer2():
+            return {"key1": "val1b"}
+
+        self.assertEqual(
+            {"key1": "val1b", "key2": "val2"},
+            config.load_config([
+                configer1,
+                configer2,
+            ])
+        )
+
+
+class TestJSONConfig(unittest.TestCase):
+
+    def test(self):
+        self.assertEqual(
+            {"key1": "val1"},
+            config.json_config(
+                os.path.join(HERE, "fixtures", "config.json")
+            )
+        )
+
+        self.assertEqual(
+            {},
+            config.json_config(
+                os.path.join(HERE, "fixtures", "nothere.json")
+            )
+        )
+
+
 if __name__ == '__main__':
     unittest.main()
-        
