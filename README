@@ -1,0 +1,8 @@
+This is a simple text based budget scheduling application
+
+
+File Format
+============
+txtbudget takes a specially formatted CSV file to schedule transactons. Look
+in the file "data/schedule.sample.txt" for a tutorial on how to use this 
+application.
