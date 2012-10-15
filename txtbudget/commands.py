@@ -4,13 +4,16 @@ from dateutil import rrule
 from dateutil import parser
 from dateutil.relativedelta import relativedelta
 from datetime import date
+from config import load_config, json_config
+from functools import partial
+import os
 import re
 import sys
 
 
 def balance(config, args):
     """Lists out scheduled transactions between two dates
-Usage: 
+Usage:
 list [start] [end] - lists transactions between two dates
 list [end] - lists out transactions from their start until today
 list [month number] - list out the transactions for a month
@@ -20,6 +23,7 @@ list [month number] - list out the transactions for a month
 
     schedule_filename = config['filename']
     dates = args
+    month_start = int(config.get("month_start", 1))
 
     if len(dates) == 2:
         dtstart = parser.parse(dates[0])
@@ -32,7 +36,7 @@ list [month number] - list out the transactions for a month
             except IndexError:
                 month = date.today().month
 
-            dtstart = parser.parse("%s/1" % (month, ))
+            dtstart = parser.parse("%s/%s" % (month, month_start))
             dtend = dtstart + relativedelta(months=1) - relativedelta(days=1)
         except ValueError:
             dtstart = None
@@ -42,10 +46,10 @@ list [month number] - list out the transactions for a month
 list [end date]
 list [month number]
 list""")
-        
+
 
     fh = codecs.open(schedule_filename, "r", "utf-8")
-    
+
     gen = schedule_parser_gen(fh)
     gen = (si.until(dtend, dtstart=dtstart) for si in gen)
     gen = itertools.chain(*gen)
@@ -72,7 +76,7 @@ def pycmd(config, args):
     cmd = " ".join(args)
 
     pprint(eval(cmd, {}, config.get("locals", {})))
-    
+
 
 COMMAND_MAP = {
     "list": balance,
@@ -81,9 +85,22 @@ COMMAND_MAP = {
 
 
 def main():
-    config = {
-        'filename': sys.argv[1]
+    def arg_config():
+        return {
+            'filename': sys.argv[1]
         }
+
+    config = load_config([
+        partial(
+            json_config,
+            os.path.expanduser("~/.txtbudget.json")
+        ),
+        partial(
+            json_config,
+            os.path.abspath("./.txtbudget.json")
+        ),
+        arg_config
+    ])
 
     if len(sys.argv) > 2:
         line = " ".join(sys.argv[2:])
@@ -93,4 +110,3 @@ def main():
     else:
         simplecmd(COMMAND_MAP,config=config,
                   histfile="~/.pybudget.hist",)
-    
