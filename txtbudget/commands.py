@@ -66,8 +66,10 @@ list""")
 
     # Print the result
     print u"-"*79
+    total = 0
     for i, item in enumerate(result):
-        print u"%s. %s" % (i, item)
+        total = total + item.amount
+        print u"%.2f: %s. %s" % (total, i, item)
     print u"-"*79
     print u"%d" % (total, )
 
