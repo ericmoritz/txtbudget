@@ -56,13 +56,16 @@ class TransactionItem(object):
     def __iter__(self):
         return iter([self.name, self.amount, self.date])
 
-    def __unicode__(self):
+    def serialize(self):
         bits = list(self)
         bits[2] = bits[2].strftime("%m/%d/%Y")
 
         bits = map(lambda x: x or "", bits)
         bits = map(unicode, bits)        
-        return ", ".join(bits)
+        return bits
+
+    def __unicode__(self):
+        return ", ".join(self.serialize())
 
     def __cmp__(self, other):
         return cmp((self.date, self.name, self.amount),

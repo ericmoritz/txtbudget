@@ -6,6 +6,7 @@ from dateutil.relativedelta import relativedelta
 from datetime import date
 from config import load_config, json_config
 from functools import partial
+import itertools
 import os
 import re
 import sys
@@ -55,23 +56,81 @@ list""")
     gen = itertools.chain(*gen)
     gen = (TransactionItem(*x) for x in gen)
 
+    def result_key(ti):
+        return (ti.date, ti.name)
+
     # Sort the result
-    result = sorted(gen)
+    result = sorted(gen, key=result_key)
 
     # Locals is used by the ! command to define it's locals
     config['locals'] = {'r': [(i.name, i.amount, i.date) for i in result]}
 
-    # Get the sum
-    total = sum((ti.amount for ti in result))
-
     # Print the result
     print u"-"*79
-    total = 0
-    for i, item in enumerate(result):
-        total = total + item.amount
-        print u"%.2f: %s. %s" % (total, i, item)
-    print u"-"*79
-    print u"%d" % (total, )
+    output_result(result)
+
+
+def output_result(result):
+    def columns(state, item):
+        total, items = state
+        total += item.amount
+        items.append([total] + list(item))
+        return (total, items)
+
+    def rows():
+        _, rows_ = reduce(
+            columns,
+            result,
+            (0, []),
+        )
+        return rows_
+        
+    # returns the max string width of all strings in the table
+    def width(rows):
+        def w(x):
+            if isinstance(x, basestring):
+                return len(x)
+            else:
+                return 0
+        return max(
+            map(
+                w,
+                itertools.chain.from_iterable(rows)
+            )
+        )
+
+    # serialize a column
+    def show_column(width, x):
+        if type(x) is float:
+            if x < 0:
+                wrap = "({:.2f})"
+            else:
+                wrap = "{:.2f} "
+            
+            return u"{:>9}".format(wrap.format(abs(x)))
+        elif hasattr(x, "strftime"):
+            s =  x.strftime("%m/%d/%Y")
+        else:
+            s = unicode(x)
+
+        return u"{:<{width}}".format(s, width=width)
+
+    def show_row(width, row):
+        return " | ".join(map(
+            partial(show_column, width),
+            row
+        ))
+
+    rows_  = rows()
+    width_ = width(rows_)
+    rows_str = map(
+            partial(show_row, width_),
+            rows_
+    )
+    for i, r in enumerate(rows_str):
+        print "{:>3} | {}".format(i, r)
+        
+    
 
 def pycmd(config, args):
     from pprint import pprint
