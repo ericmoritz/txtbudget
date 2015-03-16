@@ -2,6 +2,7 @@ from dateutil import rrule
 from dateutil import parser
 from dateutil.relativedelta import relativedelta
 from datetime import date
+from collections import namedtuple
 import re
 import sys
 
@@ -47,22 +48,20 @@ The third group is the count since the start"""
 
 
 
-class TransactionItem(object):
-    def __init__(self, name, amount, date):
-        self.name = name
-        self.amount = amount
-        self.date = date
-
+class TransactionItem(namedtuple("TransactionItem", ["name", "amount", "date"])):
     def __iter__(self):
         return iter([self.name, self.amount, self.date])
 
-    def __unicode__(self):
+    def serialize(self):
         bits = list(self)
         bits[2] = bits[2].strftime("%m/%d/%Y")
 
         bits = map(lambda x: x or "", bits)
         bits = map(unicode, bits)        
-        return ", ".join(bits)
+        return bits
+
+    def __unicode__(self):
+        return ", ".join(self.serialize())
 
     def __cmp__(self, other):
         return cmp((self.date, self.name, self.amount),
@@ -85,7 +84,7 @@ class ScheduleItem(object):
         for dt in self.rrule.between(dtstart,
                                      dtend,
                                      inc=True):
-            yield (self.name, self.amount, dt)
+            yield TransactionItem(self.name, self.amount, dt)
 
 
     def __cmp__(self, other):
