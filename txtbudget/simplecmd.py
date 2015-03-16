@@ -117,6 +117,8 @@ def simplecmd(COMMAND_MAP, line=None, config=None,
                 cmd_mapping[cmd](config, args)
             except SystemExit:
                 break
+            except Exception, e:
+                print str(e)
 
         else:
             print "Command not found.\n"

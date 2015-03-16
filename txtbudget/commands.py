@@ -1,4 +1,4 @@
-from utils import *
+from txtbudget import queries
 from simplecmd import simplecmd, InvalidArgs
 from dateutil import rrule
 from dateutil import parser
@@ -50,17 +50,7 @@ list""")
 
 
     fh = codecs.open(schedule_filename, "r", "utf-8")
-
-    gen = schedule_parser_gen(fh)
-    gen = (si.until(dtend, dtstart=dtstart) for si in gen)
-    gen = itertools.chain(*gen)
-    gen = (TransactionItem(*x) for x in gen)
-
-    def result_key(ti):
-        return (ti.date, ti.name)
-
-    # Sort the result
-    result = sorted(gen, key=result_key)
+    result = queries.until(fh, dtend, dtstart=dtstart)
 
     # Locals is used by the ! command to define it's locals
     config['locals'] = {'r': [(i.name, i.amount, i.date) for i in result]}
